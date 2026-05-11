@@ -5,7 +5,11 @@
  * Job Search API
  * OpenAPI spec version: 0.1.0
  */
+import type { Job } from "./job";
 
-export interface HealthStatus {
-  status: string;
+export interface JobList {
+  jobs: Job[];
+  total: number;
+  page: number;
+  limit: number;
 }

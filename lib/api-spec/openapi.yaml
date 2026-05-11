@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Job Search API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Job listing operations
+  - name: categories
+    description: Job category operations
 paths:
   /healthz:
     get:
@@ -24,6 +28,138 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List jobs
+      description: Returns a paginated list of jobs with optional filters
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          description: Search keyword
+        - name: location
+          in: query
+          schema:
+            type: string
+          description: Filter by location
+        - name: categoryId
+          in: query
+          schema:
+            type: ["integer", "null"]
+          description: Filter by category ID
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [full-time, part-time, contract, remote]
+          description: Filter by job type
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Results per page
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobList"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a job listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/stats:
+    get:
+      operationId: getJobStats
+      tags: [jobs]
+      summary: Get job statistics
+      description: Returns counts of jobs grouped by category and type
+      responses:
+        "200":
+          description: Job statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobStats"
+
+  /jobs/featured:
+    get:
+      operationId: getFeaturedJobs
+      tags: [jobs]
+      summary: Get featured jobs
+      description: Returns a curated list of featured/highlighted jobs for the homepage
+      responses:
+        "200":
+          description: Featured jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List job categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +170,159 @@ components:
       required:
         - status
 
+    Job:
+      type: object
+      required:
+        - id
+        - title
+        - company
+        - location
+        - type
+        - description
+        - categoryId
+        - postedAt
+        - featured
+        - salary
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        company:
+          type: string
+        companyLogo:
+          type: ["string", "null"]
+        location:
+          type: string
+        type:
+          type: string
+          enum: [full-time, part-time, contract, remote]
+        description:
+          type: string
+        requirements:
+          type: ["string", "null"]
+        salary:
+          type: string
+        categoryId:
+          type: integer
+        category:
+          $ref: "#/components/schemas/Category"
+        postedAt:
+          type: string
+          format: date-time
+        featured:
+          type: boolean
+        applicants:
+          type: ["integer", "null"]
+
+    JobInput:
+      type: object
+      required:
+        - title
+        - company
+        - location
+        - type
+        - description
+        - categoryId
+        - salary
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        companyLogo:
+          type: string
+        location:
+          type: string
+        type:
+          type: string
+          enum: [full-time, part-time, contract, remote]
+        description:
+          type: string
+        requirements:
+          type: string
+        salary:
+          type: string
+        categoryId:
+          type: integer
+        featured:
+          type: boolean
+          default: false
+
+    JobList:
+      type: object
+      required:
+        - jobs
+        - total
+        - page
+        - limit
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    JobStats:
+      type: object
+      required:
+        - totalJobs
+        - byCategory
+        - byType
+      properties:
+        totalJobs:
+          type: integer
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryCount"
+        byType:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeCount"
+
+    CategoryCount:
+      type: object
+      required:
+        - categoryId
+        - name
+        - count
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+        count:
+          type: integer
+
+    TypeCount:
+      type: object
+      required:
+        - type
+        - count
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+
+    Category:
+      type: object
+      required:
+        - id
+        - name
+        - icon
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          type: string
+        jobCount:
+          type: ["integer", "null"]
