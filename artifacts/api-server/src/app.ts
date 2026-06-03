@@ -5,10 +5,10 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
-
-app.use(
-  pinoHttp({
-    logger,
+   app.use(
+     // @ts-expect-error
+    pinoHttp({
+      logger,
     serializers: {
   req(req: any) {
     return {
