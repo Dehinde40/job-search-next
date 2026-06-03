@@ -21,10 +21,9 @@ app.use(
     return {
       statusCode: res.statusCode,
     };
-  },
-  },
-    },
-  }),
+  }
+  }
+  })
 );
 app.use(cors());
 app.use(express.json());
