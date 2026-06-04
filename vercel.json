@@ -1,7 +1,4 @@
 {
-  "rootDirectory": "apps/api-server", 
-  "buildCommand": "pnpm run build",
-  "env": {
-    "SKIP_TYPE_CHECK": "true"
-  }
+  "buildCommand": "cd ../.. && pnpm --filter @workspace/api-zod build && pnpm --filter @workspace/api-server build",
+  "installCommand": "cd ../.. && pnpm install"
 }
