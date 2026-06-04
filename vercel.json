@@ -1,4 +1,0 @@
-{
-  "buildCommand": "cd ../.. && pnpm --filter @workspace/api-zod build && pnpm --filter @workspace/api-server build",
-  "installCommand": "cd ../.. && pnpm install"
-}
