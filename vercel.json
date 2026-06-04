@@ -1,4 +1,0 @@
-find . -name "vercel.json" -delete
-git add .
-git commit -m "Delete all vercel.json files"
-git push
